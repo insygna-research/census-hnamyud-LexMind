@@ -30,3 +30,39 @@ tags:
   - "langgraph"
   - "langsmith"
   - "python"
+
+# The app container: ai-service, the compose service the build promotes (no root Dockerfile), which
+# loads the ONNX embedding model (compose: mem_limit 3g). The others are sized under runtime.containers,
+# their memory limits taken from docker-compose.yml's mem_limit where it sets one.
+resources:
+  cpu:
+    request: "500m"
+    limit: "2"
+  memory:
+    request: "2Gi"
+    limit: "3Gi"
+
+runtime:
+  containers:
+    - name: ai-service
+      role: app
+    - name: redis
+      role: auxiliary
+      resources:
+        cpu: { request: "100m", limit: "500m" }
+        memory: { request: "256Mi", limit: "512Mi" }
+    - name: core-api
+      role: auxiliary
+      resources:
+        cpu: { request: "250m", limit: "1" }
+        memory: { request: "256Mi", limit: "512Mi" }
+    - name: core-migrate
+      role: auxiliary
+      resources:
+        cpu: { request: "100m", limit: "500m" }
+        memory: { request: "128Mi", limit: "256Mi" }
+    - name: core-mail-worker
+      role: auxiliary
+      resources:
+        cpu: { request: "50m", limit: "250m" }
+        memory: { request: "128Mi", limit: "256Mi" }
